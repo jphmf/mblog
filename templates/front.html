@@ -6,7 +6,13 @@
 	</head>
 
 	<body>
-		<h1>Home</h1>
-
+		<h1><a href="/blog">Home</a></h1>
+        {% for post in posts %}
+            <div class="post">
+                <div class="title">{{post.title}}</div>
+                <div class="content">{{post.content}}</div>
+            </br>
+            </div>
+        {% endfor %}
 	</body>
 </html>

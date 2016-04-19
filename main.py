@@ -45,14 +45,20 @@ class Handler(webapp2.RequestHandler):
 
 class MainPage(Handler):
     def get(self):
-        self.render("front.html")
+        posts = db.GqlQuery("Select * from Post "
+                            "Order By created DESC limit 10")
+        self.render("front.html", posts=posts)
+
+
+class DetailPostHandler(Handler):
+    def get(self, post_id):
+        post = Post.get_by_id(long(post_id))
+        self.render("post.html", post=post)
 
 
 class CreatePostHandler(Handler):
     def render_form(self, title="", content="", error=""):
-        posts = db.GqlQuery("Select * from Post")
-        self.render("form.html", title=title, content=content, error=error,
-                    posts=posts)
+        self.render("form.html", title=title, content=content, error=error)
 
     def get(self):
         self.render_form()
@@ -64,9 +70,10 @@ class CreatePostHandler(Handler):
         if title and content:
             post = Post(title=title, content=content)
             post.put()
-            self.redirect("/createPost")
+            self.redirect("/blog/" + str(post.key().id()))
         else:
             error = "We need both a title and some artwork"
             self.render_form(title, content, error)
-app = webapp2.WSGIApplication([('/', MainPage),
-                              ('/createPost', CreatePostHandler)], debug=True)
+app = webapp2.WSGIApplication([('/blog', MainPage),
+                              ('/blog/newpost', CreatePostHandler),
+                              ('/blog/(\d+)', DetailPostHandler)], debug=True)
